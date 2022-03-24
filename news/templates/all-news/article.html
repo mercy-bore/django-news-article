@@ -1,0 +1,27 @@
+{%extends 'all-news/base.html'%} {% block content %}
+
+<div class="container">
+    <h1 class="text-center" style="color: #6153cc;">News Article {{article.id}}</h1>
+
+    <div class="row" style="border:solid 5px #6153cc;border-radius: 25px;">
+
+        <!--Display news Article images  -->
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <img src="{{article.article_image.url}}" class="img-responsive" alt="Image" style="width:600px;height:400px; ">
+        </div>
+        <!-- displaying News articles -->
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <h2 class="text-center" style="color: #6153cc;"> {{ article.title }} </h2>
+        </div>
+        <!--Display news Article post -->
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <p>{{article.post}}</p>
+        </div>
+        <!--Display news Article date posted -->
+
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="color: #6153cc;">
+            <p>Posted {{ article.pub_date|timesince}} by {{article.editor.first_name}}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
