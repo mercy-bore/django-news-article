@@ -31,6 +31,9 @@ SECRET_KEY = 'django-insecure-bfqg-x8b0%l3+f2b$w(hhw_#lir4o_g6f5hact8qzyqa=k^byz
 # DEBUG = os.environ.get('DEBUG', False) #PROD
 ALLOWED_HOSTS = ['*']
 DEBUG = True
+LOGIN_REDIRECT_URL = "newsToday"
+LOGOUT_REDIRECT_URL = "newsToday"  # new
+
 
 # Email configurations remember to install python-decouple
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
