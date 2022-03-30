@@ -17,6 +17,12 @@
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <p>{{article.post}}</p>
         </div>
+
+        <div class="row">
+            {% autoescape on %} {{article.post| safe}} {% endautoescape %}
+
+        </div>
+
         <!--Display news Article date posted -->
 
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="color: #6153cc;">
