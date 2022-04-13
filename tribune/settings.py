@@ -22,10 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# from decouple import config, Csv
-# MODE=config("MODE",default="dev")
-# SECRET_KEY=config('SECRET_KEY')
-SECRET_KEY = 'django-insecure-bfqg-x8b0%l3+f2b$w(hhw_#lir4o_g6f5hact8qzyqa=k^byz'
+from decouple import config, Csv
+MODE=config("MODE",default="dev")
+SECRET_KEY=config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.environ.get('DEBUG', False) #PROD
@@ -54,13 +53,16 @@ INSTALLED_APPS = [
     'news.apps.NewsConfig',
     'bootstrap3',
     'tinymce',
-
-   
-
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 MIDDLEWARE = [
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -107,28 +109,28 @@ DATABASES = {
 }
 
 # PROD
-# if config('MODE') == 'dev':
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': config('DB_NAME'),
-#             'USER':  config('DB_USER'),
-#             'PASSWORD':config('DB_PASSWORD'),
-#             'HOST': config('DB_HOST'),
-#             'PORT': '',
+if config('MODE') == 'dev':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER':  config('DB_USER'),
+            'PASSWORD':config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': '',
 
-#         }
-#     }
-# else:
-#     DATABASES = {
-#         'default': dj_database_url.config(
-#             default=config('DATABASE_URL')
-#         )
-#     }
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=config('DATABASE_URL')
+        )
+    }
 
-# db_from_env = dj_database_url.config(conn_max_age=500)
-# DATABASES['default'].update(db_from_env)
-# ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv)
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv)
 
 
 
@@ -167,19 +169,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 STATIC_URL = '/static/'
 
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
     
 )
 
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Configure Django App for Heroku.
-# django_heroku.settings(locals())
+django_heroku.settings(locals())
 

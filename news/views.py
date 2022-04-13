@@ -1,13 +1,57 @@
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from django.shortcuts import render,redirect
-import datetime as dt 
+from django.http import JsonResponse
+import datetime as dt
 from .models import Article, NewsLetterRecipients
 from .forms import  NewsLetterForm,NewArticleForm
 from django.contrib.auth.decorators import login_required
-
-
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import  MoringaMerch
+from .serializers import MerchSerializer
+from rest_framework import status
+from .permissions import IsAdminOrReadOnly
 
 # Create your views here.
+class MerchDescription(APIView):
+    permission_classes = (IsAdminOrReadOnly,)
+    def get_merch(self, pk):
+        try:
+            return MoringaMerch.objects.get(pk=pk)
+        except MoringaMerch.DoesNotExist:
+            return Http404
+
+    def get(self, request, pk, format=None):
+        merch = self.get_merch(pk)
+        serializers = MerchSerializer(merch)
+        return Response(serializers.data)
+    def put(self, request, pk, format=None):
+        merch = self.get_merch(pk)
+        serializers = MerchSerializer(merch, request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data)
+        else:
+            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, pk, format=None):
+        merch = self.get_merch(pk)
+        merch.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+class MerchList(APIView):     
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get(self, request, format=None):
+        all_merch = MoringaMerch.objects.all()
+        serializers = MerchSerializer(all_merch, many=True)
+        return Response(serializers.data)
+
+    def post(self, request, format=None):
+        serializers = MerchSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data, status=status.HTTP_201_CREATED)
+        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
 def welcome(request):
     # return HttpResponse('Welcome to the Moringa Tribune')
     return render(request, 'welcome.html')
@@ -16,23 +60,19 @@ def welcome(request):
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from .email import send_welcome_email
 def news_today(request):
-    date = dt.date.today()  
+    date = dt.date.today()
     news = Article.todays_news()
-    if request.method == 'POST':
-        form = NewsLetterForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['your_name']
-            email = form.cleaned_data['email']
+    form = NewsLetterForm()
+    return render(request, 'all-news/today-news.html', {"date": date, "news": news, "letterForm": form})
+def newsletter(request):
+    name = request.POST.get('your_name')
+    email = request.POST.get('email')
 
-            recipient = NewsLetterRecipients(name = name,email =email)
-            recipient.save()
-            send_welcome_email(name,email)
-
-            HttpResponseRedirect('news_today')
-
-    else:
-        form = NewsLetterForm()
-    return render(request, 'all-news/today-news.html', {"date": date,"news":news,"letterForm":form})
+    recipient = NewsLetterRecipients(name=name, email=email)
+    recipient.save()
+    send_welcome_email(name, email)
+    data = {'success': 'You have been successfully added to mailing list'}
+    return JsonResponse(data)
 
 def past_days_news(request, past_date):
     try:
@@ -63,7 +103,7 @@ def search_results(request):
     else:
         message = "You haven't searched for any term"
         return render(request, 'all-news/search.html',{"message":message})
-    
+
 @login_required(login_url='/accounts/login/')
 def article(request,article_id):
     try:
